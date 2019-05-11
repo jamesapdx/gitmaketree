@@ -94,17 +94,18 @@ gitmaketree_function () {
         if (( $error )); then
             echo "Error unable to create link _$branch_name"
         else
+            echo "> _$branch_name created"
             if ! [[ -e .gitignore ]]; then
                 # if it doesn't exist ignore itself
                 touch .gitignore
                 echo -e "\n.gitignore" >> .gitignore
-                echo "> .gitignore created. \".gitignore\" added to .gitignore"
+                echo "> .gitignore created. .gitignore added to itself"
             else
-                echo "> .gitignore already exists. \".gitignore\" NOT added to .gitignore"
+                echo "> .gitignore already exists. .gitignore NOT added to itself"
             fi
             sed -i '/^${branch_name}$/d' .gitignore
             echo -e "\n_${branch_name}" >> .gitignore
-            echo "> \"_${branch_name}\" added to .gitignore"
+            echo "> _${branch_name} added to .gitignore"
         fi
 
         # CREATE PARENT LINK AND ADD TO GITIGNORE
@@ -114,17 +115,18 @@ gitmaketree_function () {
         if (( $error )); then
             echo "Error unable to create link ${worktree_absolute_path}/_parent"
         else
+            echo "> ${worktree_absolute_path}/_parent created"
             if ! [[ -e "${1}/.gitignore" ]]; then
                 # if it doesn't exist ignore itself
                 touch "${1}/.gitignore"
                 echo -e "\n.gitignore" >> "${1}/.gitignore"
-                echo "> ${1}/.gitignore created. \".gitignore\" added to ${1}/.gitignore"
+                echo "> ${1}/.gitignore created. .gitignore added to itself"
             else
-                echo "> ${1}/.gitignore already exists. \".gitignore\" NOT added to ${1}/.gitignore"
+                echo "> ${1}/.gitignore already exists. .gitignore NOT added to itself"
             fi
             sed -i '/^_parent$/d' "${1}/.gitignore"
             echo -e "\n_parent" >> "${1}/.gitignore"
-            echo "> \"_parent\" added to ${1}/.gitignore"
+            echo "> _parent added to ${1}/.gitignore"
         fi
 
         # COPY EXTRA STUFF
