@@ -34,7 +34,8 @@ copy_extra_stuff_path2=""
 # USAGE
 IFS= read -r -d '' usage <<EOF
 usage: $0 <path_new_worktree>
-       A new branch will be created from the name of the last directory in <path_new_worktree>.
+       A new branch will be created from the name of the last directory in <path_new_worktree>
+
        To fix the path from growing when following symbolic links, do:
            > $0 install
        or add the following to ~./bashrc
