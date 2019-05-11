@@ -88,19 +88,16 @@ gitmaketree_function () {
         # CREATE WORKTREE
         branch_name=$(basename "$1")
         git worktree add "$1"
-        error=$?; (( $error )) && echo "Error using git worktree add ${1}." && exit 1
+        (( $? )) && echo "Error using git worktree add ${1}." && exit 1
 
         # CREATE BRANCH LINK AND ADD TO GITIGNORE
         worktree_absolute_path=$(realpath "$1")
         ln -sf "$worktree_absolute_path" "_$branch_name"
-        error=$?
-        if (( $error )); then
+        if (( $? )); then
             echo "Error unable to create link _$branch_name"
         else
             echo "> _$branch_name link created"
             if ! [[ -e .gitignore ]]; then
-                # if it doesn't exist ignore itself
-                touch .gitignore
                 echo -e "\n.gitignore" >> .gitignore
                 echo "> .gitignore created. .gitignore added to itself"
             else
@@ -115,14 +112,11 @@ gitmaketree_function () {
         echo "> working in ${worktree_absolute_path}/ now"
         cwd=$(pwd)
         ln -sf "$cwd" "${worktree_absolute_path}/_parent"
-        error=$?
-        if (( $error )); then
+        if (( $? )); then
             echo "Error unable to create link ${worktree_absolute_path}/_parent"
         else
             echo "> _parent link created"
             if ! [[ -e "${1}/.gitignore" ]]; then
-                # if it doesn't exist ignore itself
-                touch "${1}/.gitignore"
                 echo -e "\n.gitignore" >> "${1}/.gitignore"
                 echo "> .gitignore created. .gitignore added to itself"
             else
@@ -142,7 +136,7 @@ gitmaketree_function () {
         if [[ -n $copy_extra_stuff_path2 ]]; then
             echo "> copying $copy_extra_stuff_path2 to $1"
             \cp "$copy_extra_stuff_path2" "$1"
-            error=$?; (( $error )) && echo "Error unable to copy $copy_extra_stuff_path2 to $1"
+            (( $? )) && echo "Error unable to copy $copy_extra_stuff_path2 to $1"
         fi
     fi
 }
