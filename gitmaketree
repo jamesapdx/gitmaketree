@@ -9,7 +9,6 @@
 #       - shows ascii tree art
 #
 #   put this script somewhere in your path
-#   thanks Kevin Hudson for pointing out worktrees
 #
 #   !! to fix the path from growing when following symbolic links, do:
 #      > gitmaketree install
