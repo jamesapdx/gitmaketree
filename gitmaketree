@@ -19,7 +19,6 @@
 #   2) make a symbolic link to the new worktree directory and add that to .gitignore
 #   3) make a symbolic link in the new worktree directory back to parent and add that to it's .gitignore
 #   4) copy_extra_stuff_path1/2 that creating a new worktree might not do
-#   5) cd to the new worktree (cd_to_new_worktree_at_end=1 #1=yes, 0=no)
 #   
 ##########################################################################################
 
@@ -27,7 +26,6 @@
 warn_if_uncommited_unstaged_files=1 #1=yes, 0=no
 warn_if_not_on_master=1             #1=yes, 0=no
 warn_if_in_current_dir_or_path=1    #1=yes, 0=no
-cd_to_new_worktree_at_end=1         #1=yes, 0=no
 copy_extra_stuff_path1=""
 copy_extra_stuff_path2=""
 
@@ -100,13 +98,13 @@ gitmaketree_function () {
                 # if it doesn't exist ignore itself
                 touch .gitignore
                 echo -e "\n.gitignore" >> .gitignore
-                echo ".gitignore created. \".gitignore\" added to .gitignore"
+                echo "> .gitignore created. \".gitignore\" added to .gitignore"
             else
-                echo ".gitignore already exists. \".gitignore\" NOT added to .gitignore"
+                echo "> .gitignore already exists. \".gitignore\" NOT added to .gitignore"
             fi
             sed -i '/^${branch_name}$/d' .gitignore
             echo -e "\n_${branch_name}" >> .gitignore
-            echo "\"_${branch_name}\" added to .gitignore"
+            echo "> \"_${branch_name}\" added to .gitignore"
         fi
 
         # CREATE PARENT LINK AND ADD TO GITIGNORE
@@ -120,29 +118,25 @@ gitmaketree_function () {
                 # if it doesn't exist ignore itself
                 touch "${1}/.gitignore"
                 echo -e "\n.gitignore" >> "${1}/.gitignore"
-                echo "${1}/.gitignore created. \".gitignore\" added to ${1}/.gitignore"
+                echo "> ${1}/.gitignore created. \".gitignore\" added to ${1}/.gitignore"
             else
-                echo "${1}/.gitignore already exists. \".gitignore\" NOT added to ${1}/.gitignore"
+                echo "> ${1}/.gitignore already exists. \".gitignore\" NOT added to ${1}/.gitignore"
             fi
             sed -i '/^_parent$/d' "${1}/.gitignore"
             echo -e "\n_parent" >> "${1}/.gitignore"
-            echo "\"_parent\" added to ${1}/.gitignore"
+            echo "> \"_parent\" added to ${1}/.gitignore"
         fi
 
         # COPY EXTRA STUFF
         if [[ -n $copy_extra_stuff_path1 ]]; then
+            echo "> copying $copy_extra_stuff_path1 to $1"
             \cp "$copy_extra_stuff_path1" "$1"
             error=$?; (( $error )) && echo "Error unable to copy $copy_extra_stuff_path1 to $1"
         fi
         if [[ -n $copy_extra_stuff_path2 ]]; then
+            echo "> copying $copy_extra_stuff_path2 to $1"
             \cp "$copy_extra_stuff_path2" "$1"
             error=$?; (( $error )) && echo "Error unable to copy $copy_extra_stuff_path2 to $1"
-        fi
-
-        # SWITCH TO NEW WORKTREE
-        if (( $cd_to_new_worktree_at_end )); then
-            echo "switching to $worktree_absolute_path (absolute path for: ${1})"
-            cd "$worktree_absolute_path"
         fi
     fi
 }
