@@ -6,7 +6,10 @@
 #       - makes it supper easy to switch back and forth from worktree to master (parent)
 #       - helps eliminate being in the wrong directory when working
 #       - adds a few extra checks when creating a worktree so you don't make mistakes
-#       - shows you tree ascii art
+#       - shows ascii tree art
+#
+#   put this script somewhere in your path
+#   thanks Kevin Hudson for pointing out worktrees
 #
 #   !! to fix the path from growing when following symbolic links, do:
 #      > gitmaketree install
@@ -55,28 +58,28 @@ gitmaketree_function () {
     else
         # WARNINGS
         rp=$(realpath "$1" 2>/dev/null); 
-        if [[ -n $rp ]]; then 
-            echo "New worktree absolute path: $rp"
-        else 
-            rp="$1"
-            echo "New worktree path: $rp"
-        fi
-        if (( $warn_if_in_current_dir_or_path)) && ( ! [[ "$rp" =~ "/" ]] || [[ "$(pwd)" =~ "$rp" ]] ); then
-            read -p "WARNING: Worktree path should not be inside the current directory or a sub-path. Continue [Y/N]? " reply1
+        if [[ -z $rp ]]; then rp="$1"; fi
+        if (( $warn_if_in_current_dir_or_path )) && ( ! [[ "$rp" =~ "/" ]] || [[ "$(pwd)" =~ "$rp" ]] || [[ "$rp" =~ "$(pwd)" ]] ); then
+            echo "WARNING: Worktree path should not be created inside the current directory or a sub-path"
+            echo "     Current path      : $(pwd)"
+            echo "     New worktree path : $rp"
+            read -p "Continue [Y/N]? " reply1
             if ! [[ $reply1 =~ ^[Yy] ]]; then
                 exit
             fi
         fi
         if (( $warn_if_not_on_master )) && [[ $(git rev-parse --abbrev-ref HEAD 2>/dev/null) != "master" ]]; then
-            git log --oneline
-            read -p "WARNING: Not on master branch or latest commit. Continue [Y/N]? " reply2
+            echo "WARNING: Not on master branch or latest commit:"
+            git log --oneline | sed 's/^/    /g'
+            read -p "Continue [Y/N]? " reply2
             if ! [[ $reply2 =~ ^[Yy] ]]; then
                 exit
             fi
         fi
         if (( $warn_if_uncommited_unstaged_files )) && [[ $(git status --porcelain 2>/dev/null) ]]; then
-            git status --porcelain
-            read -p "WARNING: Uncommitted or unstaged files exist. Continue [Y/N]? " reply3
+            echo "WARNING: Uncommitted or unstaged files exist:"
+            git status --porcelain | sed 's/^/    /g'
+            read -p "Continue [Y/N]? " reply3
             if ! [[ $reply3 =~ ^[Yy] ]]; then
                 exit
             fi
@@ -94,14 +97,14 @@ gitmaketree_function () {
         if (( $error )); then
             echo "Error unable to create link _$branch_name"
         else
-            echo "> _$branch_name created"
+            echo "> _$branch_name link created"
             if ! [[ -e .gitignore ]]; then
                 # if it doesn't exist ignore itself
                 touch .gitignore
                 echo -e "\n.gitignore" >> .gitignore
                 echo "> .gitignore created. .gitignore added to itself"
             else
-                echo "> .gitignore already exists. .gitignore NOT added to itself"
+                echo "> .gitignore already exists. .gitignore NOT added to itself. add manually if desired"
             fi
             sed -i '/^${branch_name}$/d' .gitignore
             echo -e "\n_${branch_name}" >> .gitignore
@@ -109,24 +112,25 @@ gitmaketree_function () {
         fi
 
         # CREATE PARENT LINK AND ADD TO GITIGNORE
+        echo "> working in ${worktree_absolute_path}/ now"
         cwd=$(pwd)
         ln -sf "$cwd" "${worktree_absolute_path}/_parent"
         error=$?
         if (( $error )); then
             echo "Error unable to create link ${worktree_absolute_path}/_parent"
         else
-            echo "> ${worktree_absolute_path}/_parent created"
+            echo "> _parent link created"
             if ! [[ -e "${1}/.gitignore" ]]; then
                 # if it doesn't exist ignore itself
                 touch "${1}/.gitignore"
                 echo -e "\n.gitignore" >> "${1}/.gitignore"
-                echo "> ${1}/.gitignore created. .gitignore added to itself"
+                echo "> .gitignore created. .gitignore added to itself"
             else
-                echo "> ${1}/.gitignore already exists. .gitignore NOT added to itself"
+                echo "> .gitignore already exists. .gitignore NOT added to itself"
             fi
             sed -i '/^_parent$/d' "${1}/.gitignore"
             echo -e "\n_parent" >> "${1}/.gitignore"
-            echo "> _parent added to ${1}/.gitignore"
+            echo "> _parent added to .gitignore"
         fi
 
         # COPY EXTRA STUFF
