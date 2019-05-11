@@ -51,11 +51,7 @@ add_alias_cd_to_bashrc () {
 
 
 gitmaketree_function () {
-    if [[ -z $1 ]] || [[ -n $2 ]]; then
-        echo "usage: gitmaketree_alias <path_new_worktree>"
-        echo "       A new branch will be created from the name of the last directory in <path_new_worktree>"
-        exit 1
-    elif [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) != "true" ]]; then
+    if [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) != "true" ]]; then
         echo "Not in a working repository. Exiting"
         exit 1
     else
@@ -74,12 +70,14 @@ gitmaketree_function () {
             fi
         fi
         if (( $warn_if_not_on_master )) && [[ $(git rev-parse --abbrev-ref HEAD 2>/dev/null) != "master" ]]; then
+            git log --oneline
             read -p "WARNING: Not on master branch or latest commit. Continue [Y/N]? " reply2
             if ! [[ $reply2 =~ ^[Yy] ]]; then
                 exit
             fi
         fi
         if (( $warn_if_uncommited_unstaged_files )) && [[ $(git status --porcelain 2>/dev/null) ]]; then
+            git status --porcelain
             read -p "WARNING: Uncommitted or unstaged files exist. Continue [Y/N]? " reply3
             if ! [[ $reply3 =~ ^[Yy] ]]; then
                 exit
