@@ -4,7 +4,7 @@
 #   
 #   gitmaketree - created by Jim Shaffer, 5/11/19
 #       - makes it supper easy to switch back and forth from worktree to master (parent)
-#       - helps eliminate being in the wrong directory when working
+#       - helps eliminate using the wrong directory when working
 #       - adds a few extra checks when creating a worktree so you don't make mistakes
 #       - shows ascii tree art
 #
