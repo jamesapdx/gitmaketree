@@ -2,54 +2,55 @@
 
 ##########################################################################################
 #   
-#   gitmaketree -  created by Jim Shaffer
-#   to install:
-#      > gitmaketree install [<alias_name>]
-#   
-#   to change to a different alias later, just change the function name in .bashrc
-#   that looks like: 
-#       gitmaketree() {
+#   gitmaketree - created by Jim Shaffer, 5/11/19
+#       - makes it supper easy to switch back and forth from worktree to master (parent)
+#       - helps eliminate being in the wrong directory when working
+#       - adds a few extra checks when creating a worktree so you don't make mistakes
+#       - shows you tree ascii art
+#
+#   !! to fix the path from growing when following symbolic links, do:
+#      > gitmaketree install
+#   or add the following yourself to ~./bashrc
+#       alias cd='cd -P'
+#
+#   Does:
+#   1) worktree add <path_new_worktree>  (this will also create a new branch)
+#      check proper usage, new worktree not in same directory, not on master, uncommitted/unstaged files
+#   2) make a symbolic link to the new worktree directory and add that to .gitignore
+#   3) make a symbolic link in the new worktree directory back to parent and add that to it's .gitignore
+#   4) copy_extra_stuff_path1/2 that creating a new worktree might not do
+#   5) cd to the new worktree (cd_to_new_worktree_at_end=1 #1=yes, 0=no)
 #   
 ##########################################################################################
 
+# SETTINGS
+warn_if_uncommited_unstaged_files=1 #1=yes, 0=no
+warn_if_not_on_master=1             #1=yes, 0=no
+warn_if_in_current_dir_or_path=1    #1=yes, 0=no
+cd_to_new_worktree_at_end=1         #1=yes, 0=no
+copy_extra_stuff_path1=""
+copy_extra_stuff_path2=""
 
-install_in_bashrc () {
+# USAGE
+IFS= read -r -d '' usage <<EOF
+usage: $0 <path_new_worktree>
+       A new branch will be created from the name of the last directory in <path_new_worktree>.
+       To fix the path from growing when following symbolic links, do:
+           > $0 install
+       or add the following to ~./bashrc
+           alias cd=\'cd -P\'
+EOF
 
-    bashrc="~/.bashrc"
-
-    script_name=$(basename $0)
-    echo "copying $0 to ~/.$script_name"
-    \cp "$0" "~/.$script_name"
-    error=$?; (( $error )) && echo "Error copying script. Exiting." && exit 1
-
-    echo "creating alias cd=\'cd -P\'. This will force cd to switch to the absolute path"
-    echo "of a symbolic link rather than appending the link to current path. We want this."
-    echo "alias cd=\'cd -P\'  # force cd to actual physical path when following a symbolic link"
+add_alias_cd_to_bashrc () {
+    echo "creating alias cd=\'cd -P\'." 
+    echo "This will fix the path from growing when following symbolic links."
     echo
-    echo "creating alias for ${gitmaketree_alias} => ~/.$script_name"
-    echo "alias ${gitmaketree_alias}=\'~/.$script_name $1 $2 \'"
-    echo
-    echo "usage: $gitmaketree_alias <path_new_worktree>"
-    echo "       A new branch will be created from the name of the last directory in <path_new_worktree>"
-    echo
+    echo >> ~/.bashrc
+    echo "alias cd=\'cd -P\'  ### fix the path from growing when following symbolic links" >> ~/.bashrc
 }
 
-gitmaketree () {
-    # 1) worktree add <path_new_worktree>  (this will also create a new branch)
-    #    check proper usage, new worktree not in same directory, not on master, uncommitted/unstaged files
-    # 2) make a symbolic link to the new worktree directory and add that to .gitignore
-    # 3) make a symbolic link in the new worktree directory back to parent and add that to it's .gitignore
-    # 4) copy_extra_stuff_path1/2 that creating a new worktree might not do
-    # 5) cd to the new worktree (cd_to_new_worktree_at_end=1 #1=yes, 0=no)
-    # note: must have this alias to work properly with the shortcuts: alias cd='cd -P'
 
-    warn_if_uncommited_unstaged_files=1 #1=yes, 0=no
-    warn_if_not_on_master=1             #1=yes, 0=no
-    warn_if_in_current_dir_or_path=1    #1=yes, 0=no
-    cd_to_new_worktree_at_end=1         #1=yes, 0=no
-    copy_extra_stuff_path1=""
-    copy_extra_stuff_path2=""
-
+gitmaketree_function () {
     if [[ -z $1 ]] || [[ -n $2 ]]; then
         echo "usage: gitmaketree_alias <path_new_worktree>"
         echo "       A new branch will be created from the name of the last directory in <path_new_worktree>"
@@ -154,6 +155,8 @@ gitmaketree () {
 #   
 ##########################################################################################
 
+i_hate_trees=0
+if (( ! $i_hate_trees )); then
 cat <<'EOF'
                  ,@@@@@@@,
          ,,,.   ,@@@@@@/@@,  .oo8888o.
@@ -168,19 +171,13 @@ cat <<'EOF'
 
 EOF
 # https://asciiart.website/index.php?art=plants/trees
+fi
 
-if [[ -z $1 ]] || [[ $1 == "-h" ]]; then
-    echo "usage: gitmaketree_alias <path_new_worktree>"
-    echo "       A new branch will be created from the name of the last directory in <path_new_worktree>."
-    echo "       If trying to install into .bashrc, use $0 install [desired_alias]"
+if [[ -z $1 ]] || [[ $1 == "-h" ]] || [[ -n $2 ]]; then
+    echo "$usage"
 elif [[ $1 == "install" ]]; then
-    if [[ -n $2 ]]; then
-        gitmaketree_alias="$2"
-    else
-        gitmaketree_alias="gitmaketree"
-    fi
-    install_in_bashrc
+    add_alias_cd_to_bashrc
 else
-    gitmaketree $1 $2
+    gitmaketree_function $1 $2
 fi
 
