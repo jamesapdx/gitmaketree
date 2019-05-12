@@ -62,8 +62,7 @@ Following symbolic links with cd causes the existing path to grow rather than ju
 changing to the target directory. That is fine for other directories, but it's not
 what we want with our new links. To fix this:
     > $scriptname install   (add a conditional cd -P alias to ~/.bashrc)
-    > source ~/.bashrc      (load it into the current session)
-    > which cd              (to view details)"
+    - follow the instructions"
 
 cleanup="\
 When done with the worktree, clean up with:
@@ -72,14 +71,17 @@ When done with the worktree, clean up with:
     > unlink <link_to_worktree>               (remove the link)
     - merge and delete branch as needed"
 
+install_note="\
+Creating a conditional cd -P alias in ~/.bashrc
+This will fix the path from growing when following the new symbolic links.
+
+Now please do:
+    > source ~/.bashrc  (to reload bash into your current session)
+    > which cd          (to view details)
+    - copy this script to a directory in your path, such as /bin or ~/bin"
 
 add_alias_cd_to_bashrc () {
-    echo "creating a conditional cd -P alias in ~/.bashrc"
-    echo "this will fix the path from growing when following symbolic links."
-    echo "Now please do:"
-    echo "    > source ~/.bashrc  (to reload bash into your current session)"
-    echo "    > which cd          (to view details)"
-    echo "    - copy this script to a directory in your path, such as /bin or ~/bin"
+    echo "$install_note"
     echo
     echo >> ~/.bashrc
     sed -i '/### fix the path from growing/d' ~/.bashrc
