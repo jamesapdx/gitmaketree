@@ -70,7 +70,7 @@ add_alias_cd_to_bashrc () {
     sed -i '/cd_git ()/d' ~/.bashrc
     op='$@'
     echo "### fix the path from growing when following symbolic links in git repositories" >> ~/.bashrc
-    echo "cd_git () { if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then \cd -P $op; else \cd $op; fi }; alias cd='cd_git'" >> ~/.bashrc
+    echo "cd_git () { if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then \cd -P \"$op\"; else \cd \"$op\"; fi }; alias cd='cd_git'" >> ~/.bashrc
 }
 
 
@@ -204,6 +204,9 @@ if (( ! $i_hate_trees )); then
     echo "$trees"
 fi
 
+base_name=$(basename $(echo $1 | tr " " ":") 2>/dev/null)
+if [[ $base_name =~ ^[\.]|[\ \^\\\:\~] ]] || ; then
+    echo "Spaces and certain special characters not allowed in the last directory (branch name). Exiting"
 if [[ -z $1 ]] || [[ $1 == "-h" ]] || [[ -n $2 ]]; then
     echo "$usage"
     echo
