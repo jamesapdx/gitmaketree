@@ -13,23 +13,29 @@
 #   !! to fix the path from growing when following symbolic links, do:
 #       > gitmaketree install
 #   this will add the following conditional cd -P alias to .bashrc
-#   cd_git () { if [[ -e .git ]] && [[ "$@" =~ ^_ ]]; then \cd -P $@; else \cd $@; fi }; alias cd='cd_git'
-
+#       cd_git () { if [[ -e .git ]] && [[ "$@" =~ ^_ ]]; then \cd -P $@; else \cd $@; fi }; alias cd='cd_git'
+#   conditional = only when .git exists and target starts with _
+#   probably don't want cd -P, otherwise other directories will be hard to traverse
+#   shouldn't affect other operations or scripts
+#
 #   Does:
 #   1) worktree add <path_new_worktree>  (this will also create a new branch)
 #      check proper usage, new worktree not in same directory, not on master, uncommitted/unstaged files
 #   2) make a symbolic link to the new worktree directory and add that to .gitignore
 #   3) make a symbolic link in the new worktree directory back to parent and add that to it's .gitignore
-#   4) copy_extra_stuff_path1/2 that creating a new worktree might not do
+#   4) copy_extra_stuff_path1/2, used to copy stuff that git worktree add might not do
 #   
 ##########################################################################################
+
 
 # SETTINGS
 warn_if_uncommited_unstaged_files=1 #1=yes, 0=no
 warn_if_not_on_master=1             #1=yes, 0=no
 warn_if_in_current_dir_or_path=1    #1=yes, 0=no
-copy_extra_stuff_path1=""
-copy_extra_stuff_path2=""
+copy_extra_stuff_path1="test"
+copy_extra_stuff_path2="testdir"
+copy_without_overwrite_warning=0    #1=yes, 0=no
+
 
 # USAGE
 usage="\
@@ -148,18 +154,31 @@ gitmaketree_function () {
         # COPY EXTRA STUFF
         if [[ -n $copy_extra_stuff_path1 ]]; then
             echo "> copying $copy_extra_stuff_path1 to $1"
-            \cp "$copy_extra_stuff_path1" "$1"
-            error=$?; (( $error )) && echo "Error unable to copy $copy_extra_stuff_path1 to $1"
+            if (( copy_without_overwrite_warning )); then
+                \cp -r "$copy_extra_stuff_path1" "$1"
+                error=$?
+            else:
+                \cp -ri "$copy_extra_stuff_path1" "$1"
+                error=$?
+            fi
+            (( $error )) && echo "Error unable to copy $copy_extra_stuff_path1 to $1"
         fi
         if [[ -n $copy_extra_stuff_path2 ]]; then
             echo "> copying $copy_extra_stuff_path2 to $1"
-            \cp "$copy_extra_stuff_path2" "$1"
-            (( $? )) && echo "Error unable to copy $copy_extra_stuff_path2 to $1"
+            if (( copy_without_overwrite_warning )); then
+                \cp -r "$copy_extra_stuff_path2" "$1"
+                error=$?
+            else
+                \cp -ri "$copy_extra_stuff_path2" "$1"
+                error=$?
+            fi
+            (( $error )) && echo "Error unable to copy $copy_extra_stuff_path2 to $1"
         fi
     fi
 echo
 echo "$cleanup"
 }
+
 
 ##########################################################################################
 #   
