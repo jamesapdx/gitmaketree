@@ -112,11 +112,17 @@ gitmaketree_function () {
         branch_name=$(basename "$1")
         output=$(git worktree add "$1" 2>&1)
         error=$?
+        if [[ $error == "128" ]] && [[ $output =~ "already exists" ]]; then
+            echo "> worktree already exists. Continuing..."
+        elif (( $error )); then
+            echo "Error using git worktree add ${1}.  Exiting"
+            exit 1 
+        fi
         echo "error: $error"
         echo "output: $output"
         exit
         
-        #(( $? )) && echo "Error using git worktree add ${1}." && exit 1
+        #(( $? )) && echo 
         sleep .6
 
         # CREATE BRANCH LINK AND ADD TO GITIGNORE
@@ -212,7 +218,7 @@ fi
 base_name=$(basename $(echo $1 | tr " " ":") 2>/dev/null)
 if [[ $base_name =~ ^[\.]|[\ \^\\\:\~] ]]; then
     echo "Spaces and certain special characters not allowed in the last directory (branch name). Exiting"
-if [[ -z $1 ]] || [[ $1 == "-h" ]] || [[ -n $2 ]]; then
+elif [[ -z $1 ]] || [[ $1 == "-h" ]] || [[ -n $2 ]]; then
     echo "$usage"
     echo
     echo "$cleanup"
