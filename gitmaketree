@@ -32,8 +32,8 @@
 warn_if_uncommited_unstaged_files=1 #1=yes, 0=no
 warn_if_not_on_master=1             #1=yes, 0=no
 warn_if_in_current_dir_or_path=1    #1=yes, 0=no
-copy_extra_stuff_path1="test"
-copy_extra_stuff_path2="testdir"
+copy_extra_stuff_path1=""
+copy_extra_stuff_path2=""
 copy_without_overwrite_warning=0    #1=yes, 0=no
 
 
@@ -113,6 +113,7 @@ gitmaketree_function () {
         branch_name=$(basename "$1")
         git worktree add "$1"
         (( $? )) && echo "Error using git worktree add ${1}." && exit 1
+        sleep 1
 
         # CREATE BRANCH LINK AND ADD TO GITIGNORE
         worktree_absolute_path=$(realpath "$1")
@@ -151,21 +152,23 @@ gitmaketree_function () {
             echo "> _parent added to .gitignore"
         fi
 
+read -p "asdf" t
         # COPY EXTRA STUFF
         if [[ -n $copy_extra_stuff_path1 ]]; then
             echo "> copying $copy_extra_stuff_path1 to $1"
-            if (( copy_without_overwrite_warning )); then
+            if (( $copy_without_overwrite_warning )); then
                 \cp -r "$copy_extra_stuff_path1" "$1"
                 error=$?
-            else:
+            else
                 \cp -ri "$copy_extra_stuff_path1" "$1"
                 error=$?
             fi
             (( $error )) && echo "Error unable to copy $copy_extra_stuff_path1 to $1"
         fi
+read -p "asdf" t
         if [[ -n $copy_extra_stuff_path2 ]]; then
             echo "> copying $copy_extra_stuff_path2 to $1"
-            if (( copy_without_overwrite_warning )); then
+            if (( $copy_without_overwrite_warning )); then
                 \cp -r "$copy_extra_stuff_path2" "$1"
                 error=$?
             else
