@@ -34,7 +34,7 @@ copy_extra_stuff_path2=""           # e.g. ../dir or /home/jim/file
 copy_without_overwrite_warning=0    #1=yes, 0=no
 
 
-# USAGE
+# TEXT BLOCKS
 scriptname=$(basename $0)
 usage="\
 usage: 
@@ -79,15 +79,31 @@ Now please do:
     > which cd          (to view details)
     - copy this script to a directory in your path, such as /bin or ~/bin"
 
+op='$@'
+bashrc_alias="\
+### START fix the path from growing when following symbolic links in git repositories
+cd_git () { 
+    if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then 
+        # only use cd -P if .git exists and file starts with _
+        \cd -P \"$op\"; 
+    else 
+        # all other cases use normal cd
+        \cd \"$op\"
+    fi }
+alias cd='cd_git'
+### END fix the path from growing" 
+
+
 add_alias_cd_to_bashrc () {
     echo "$install_note"
     echo
     echo >> ~/.bashrc
-    sed -i '/### fix the path from growing/d' ~/.bashrc
-    sed -i '/cd_git ()/d' ~/.bashrc
-    op='$@'
-    echo "### fix the path from growing when following symbolic links in git repositories" >> ~/.bashrc
-    echo "cd_git () { if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then \cd -P \"$op\"; else \cd \"$op\"; fi }; alias cd='cd_git'" >> ~/.bashrc
+    sed -i '/### START fix the path from growing/,/### END fix the path from growing/d' ~/.bashrc
+    echo "$bashrc_alias" >> ~/.bashrc
+
+    #op='$@'
+    #echo "### fix the path from growing when following symbolic links in git repositories" >> ~/.bashrc
+    #echo "cd_git () { if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then \cd -P \"$op\"; else \cd \"$op\"; fi }; alias cd='cd_git'" >> ~/.bashrc
 }
 
 
