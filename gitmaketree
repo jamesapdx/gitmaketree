@@ -3,6 +3,8 @@
 ##########################################################################################
 #   
 #   gitmaketree - created by Jim Shaffer, 5/11/19
+#       The essence of this script is to make a new worktree and create links to/from
+#       the new worktree. Benifits
 #       - makes it supper easy to switch back and forth from worktree to master (parent)
 #       - helps eliminate using the wrong directory when working
 #       - adds a few extra checks when creating a worktree so you don't make mistakes
@@ -39,19 +41,28 @@ copy_without_overwrite_warning=0    #1=yes, 0=no
 # USAGE
 usage="\
 usage: 
-./gitmaketree <path_new_worktree>
+$0 install                       (one time setup, see below)
+$0 <path>/<new|existing_branch>  (regular use)
 
-<path_new_worktree> will be create for you, do not create it yourself
-A new branch will be created from the name of the last directory in <path_new_worktree>
+A git worktree is basically a branch in with it's own working directory. This helps
+eliminate the confusion associated with switching branches.
+
+This script will make a new git worktree and create links to/from the new worktree.  
+It can also be run against existing worktrees or branches, and working directories 
+and links will be created as needed.
+
+The worktree should be created outside your existing repository.
+    examples:  ../new_branch or /projects/wt/new_branch
+<path>/<new|existing_branch> will be create for you, do not create it yourself
 
 To fix the path from growing when following symbolic links, do:
 (this will add a conditional cd -P alias to ~/.bashrc)
-    > ./gitmaketree install
+    > $0 install
     > source ~/.bashrc
     > which cd  (to view details)"
 
 cleanup="\
-to clean up when done with the worktree:
+When done with the worktree, clean up with:
     > cd <link_to_parent>                     (get back to the parent directory)
     > git worktree remove <link_to_worktree>  (this will delete the worktree directory)
     > unlink <link_to_worktree>               (remove the link)
@@ -112,7 +123,6 @@ gitmaketree_function () {
         branch_name=$(basename "$1")
         output=$(git worktree add "$1" 2>&1)
         error=$?
-        #echo "error: $error"
         if [[ $error == "128" ]] && [[ $output =~ "already exists" ]]; then
             echo "> worktree already exists. Enabling copy warnings and continuing..."
             copy_without_overwrite_warning=0    #1=yes, 0=no
