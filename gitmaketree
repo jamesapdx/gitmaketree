@@ -4,8 +4,8 @@
 #   
 #   gitmaketree - created by Jim Shaffer, 5/11/19
 #       The essence of this script is to make a new worktree and create links to/from
-#       the new worktree. Benifits:
-#       - makes it supper easy to switch back and forth from worktree to master (parent)
+#       the new worktree. Benefits:
+#       - makes it super easy to switch back and forth from worktree to master (parent)
 #       - helps eliminate using the wrong directory when working
 #       - adds a few extra checks when creating a worktree so you don't make mistakes
 #       - shows ascii tree art
@@ -52,11 +52,11 @@ This script will:
     Add the new link names to .gitignore.
     Copy extra files/directories into the new working directory.
 
-The links make it much easier to switch directories and itendify you current directory.
+The links make it much easier to switch directories and identify your current directory.
 
 The worktree should be created outside your existing repository.
     examples:  ../new_branch or /projects/wt/new_branch
-    The new path and directories will be create for you, do not create it yourself.
+    The new path and directories will be created for you, do not create them yourself.
 
 Following symbolic links with cd causes the existing path to grow rather than just
 changing to the target directory. That is fine for other directories, but it's not
