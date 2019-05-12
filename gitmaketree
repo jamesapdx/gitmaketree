@@ -52,9 +52,9 @@ This script will:
     Add the new link names to .gitignore.
     Copy extra files/directories into the new working directory.
 
-The links make it much easier to switch directories and identify your current directory.
+Links make it much easier to switch directories and identify the current directory.
 
-The worktree should be created outside your existing repository.
+Worktrees should be created outside the existing repository.
     examples:  ../new_branch or /projects/wt/new_branch
     The new path and directories will be created for you, do not create them yourself.
 
@@ -75,7 +75,7 @@ Creating a conditional cd -P alias in ~/.bashrc
 This will fix the path from growing when following the new symbolic links.
 
 Now please do:
-    > source ~/.bashrc  (to reload .bashrc into your current session)
+    > source ~/.bashrc  (to reload .bashrc into the current session)
     > which cd          (to view details)
     - copy this script to a directory in your path, such as /bin or ~/bin"
 
