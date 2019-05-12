@@ -4,28 +4,24 @@
 #   
 #   gitmaketree - created by Jim Shaffer, 5/11/19
 #       The essence of this script is to make a new worktree and create links to/from
-#       the new worktree. Benifits
+#       the new worktree. Benifits:
 #       - makes it supper easy to switch back and forth from worktree to master (parent)
 #       - helps eliminate using the wrong directory when working
 #       - adds a few extra checks when creating a worktree so you don't make mistakes
 #       - shows ascii tree art
 #
-#   put this script somewhere in your path
+#   Put this script somewhere in your path.
 #
-#   !! to fix the path from growing when following symbolic links, do:
+#   To fix the path from growing when following symbolic links, do:
 #       > gitmaketree install
-#   this will add the following conditional cd -P alias to .bashrc
+#   This will add the following conditional cd -P alias to .bashrc
 #       cd_git () { if [[ -e .git ]] && [[ "$@" =~ ^_ ]]; then \cd -P $@; else \cd $@; fi }; alias cd='cd_git'
-#   conditional = only when .git exists and target starts with _
-#   probably don't want cd -P all the time, otherwise other directories would be hard to navigate
+#       conditional = only when .git exists and target starts with _
+#   It basically just switches to cd -P, instead of just cd, when traversing symbolic links.
+#   Without this, your path would grow and grow. Instead, we just want to switch to the actual directory.  
+#   To see this undesired behavior, follow the links using \cd (eliminates the alias) and see what happens.
+#   This alias should be safe and should not affect other scripts.
 #
-#   Does:
-#   1) worktree add <path_new_worktree>  (this will also create a new branch)
-#      checks: proper usage, new worktree not in same directory, not on master, uncommitted/unstaged files
-#   2) make a symbolic link to the new worktree directory and add that to .gitignore
-#   3) make a symbolic link in the new worktree directory back to parent and add that to it's .gitignore
-#   4) copy_extra_stuff_path1/2, used to copy stuff that git worktree add might not do
-#   
 ##########################################################################################
 
 
@@ -33,33 +29,41 @@
 warn_if_uncommited_unstaged_files=1 #1=yes, 0=no
 warn_if_not_on_master=1             #1=yes, 0=no
 warn_if_in_current_dir_or_path=1    #1=yes, 0=no
-copy_extra_stuff_path1=""
-copy_extra_stuff_path2=""
+copy_extra_stuff_path1=""           # e.g. ../dir or /home/jim/file
+copy_extra_stuff_path2=""           # e.g. ../dir or /home/jim/file
 copy_without_overwrite_warning=0    #1=yes, 0=no
 
 
 # USAGE
+scriptname=$(basename $0)
 usage="\
 usage: 
-$0 install                       (one time setup, see below)
-$0 <path>/<new|existing_branch>  (regular use)
+$scriptname install                       (one time setup, see below)
+$scriptname <path>/<new|existing_branch>  (regular use)
 
-A git worktree is basically a branch in with it's own working directory. This helps
+A git worktree is basically a branch with it's own working directory. This helps
 eliminate the confusion associated with switching branches.
 
-This script will make a new git worktree and create links to/from the new worktree.  
-It can also be run against existing worktrees or branches, and working directories 
-and links will be created as needed.
+This script will: 
+    Make a new branch and worktree directory and create links to/from the new worktree.  
+      (It can also be run against existing worktrees or branches, and working 
+       directories and links will be created as needed.) 
+    Perform extra checks before creating a new worktree to help eliminate mistakes.
+    Add the new link names to .gitignore.
+    Copy extra files/directories into the new working directory.
+
+The links make it much easier to switch directories and itendify you current directory.
 
 The worktree should be created outside your existing repository.
     examples:  ../new_branch or /projects/wt/new_branch
-<path>/<new|existing_branch> will be create for you, do not create it yourself
+    The new path and directories will be create for you, do not create it yourself.
 
-To fix the path from growing when following symbolic links, do:
-(this will add a conditional cd -P alias to ~/.bashrc)
-    > $0 install
-    > source ~/.bashrc
-    > which cd  (to view details)"
+Following symbolic links with cd causes the existing path to grow rather than just
+changing to the target directory. That is fine for other directories, but it's not
+what we want with our new links. To fix this:
+    > $scriptname install   (add a conditional cd -P alias to ~/.bashrc)
+    > source ~/.bashrc      (load it into the current session)
+    > which cd              (to view details)"
 
 cleanup="\
 When done with the worktree, clean up with:
@@ -72,9 +76,10 @@ When done with the worktree, clean up with:
 add_alias_cd_to_bashrc () {
     echo "creating a conditional cd -P alias in ~/.bashrc"
     echo "this will fix the path from growing when following symbolic links."
-    echo "Now please run:"
+    echo "Now please do:"
     echo "    > source ~/.bashrc  (to reload bash into your current session)"
     echo "    > which cd          (to view details)"
+    echo "    - copy this script to a directory in your path, such as /bin or ~/bin"
     echo
     echo >> ~/.bashrc
     sed -i '/### fix the path from growing/d' ~/.bashrc
@@ -94,7 +99,7 @@ gitmaketree_function () {
         rp=$(realpath "$1" 2>/dev/null); 
         if [[ -z $rp ]]; then rp="$1"; fi
         if (( $warn_if_in_current_dir_or_path )) && ( ! [[ "$rp" =~ "/" ]] || [[ "$(pwd)" =~ "$rp" ]] || [[ "$rp" =~ "$(pwd)" ]] ); then
-            echo "WARNING: Worktree path should not be created inside the current directory or a sub-path"
+            echo "WARNING: Worktree should not be created inside the current directory or sub-path. Only proceed if you know what you are doing:"
             echo "     Current path      : $(pwd)"
             echo "     New worktree path : $rp"
             read -p "Continue [Y/N]? " reply1
@@ -128,8 +133,13 @@ gitmaketree_function () {
             copy_without_overwrite_warning=0    #1=yes, 0=no
         elif (( $error )); then
             echo $output
-            echo "Error using git worktree add ${1}.  Exiting"
-            exit 1 
+            echo "Error using git worktree add ${1}."
+            read -p "Continue and try to make links and copy files [Y/N]? " reply4
+            echo "> Enabling copy warnings and continuing..."
+            copy_without_overwrite_warning=0    #1=yes, 0=no
+            if ! [[ $reply4 =~ ^[Yy] ]]; then
+                exit
+            fi
         fi
         sleep .5
 
