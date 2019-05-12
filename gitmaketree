@@ -11,10 +11,10 @@
 #   put this script somewhere in your path
 #
 #   !! to fix the path from growing when following symbolic links, do:
-#      > gitmaketree install
-#   or add the following yourself to ~./bashrc
-#       alias cd='cd -P'
-#
+#       > gitmaketree install
+#   this will add the following conditional cd -P alias to .bashrc
+#   cd_git () { if [[ -e .git ]] && [[ "$@" =~ ^_ ]]; then \cd -P $@; else \cd $@; fi }; alias cd='cd_git'
+
 #   Does:
 #   1) worktree add <path_new_worktree>  (this will also create a new branch)
 #      check proper usage, new worktree not in same directory, not on master, uncommitted/unstaged files
@@ -32,22 +32,39 @@ copy_extra_stuff_path1=""
 copy_extra_stuff_path2=""
 
 # USAGE
-IFS= read -r -d '' usage <<EOF
-usage: $0 <path_new_worktree>
-       A new branch will be created from the name of the last directory in <path_new_worktree>
+usage="\
+usage: 
+./gitmaketree <path_new_worktree>
 
-       To fix the path from growing when following symbolic links, do:
-           > $0 install
-       or add the following to ~./bashrc
-           alias cd=\'cd -P\'
-EOF
+<path_new_worktree> will be create for you, do not create it yourself
+A new branch will be created from the name of the last directory in <path_new_worktree>
+
+To fix the path from growing when following symbolic links, do:
+(this will add a conditional cd -P alias to ~/.bashrc)
+    > ./gitmaketree install
+    > source ~/.bashrc
+    > which cd  (to view details)"
+
+cleanup="\
+to clean up when done with the worktree:
+    > cd <link_to_parent>                     (get back to the parent directory)
+    > git worktree remove <link_to_worktree>  (this will delete the worktree directory)
+    > unlink <link_to_worktree>               (remove the link)
+    - merge and delete branch as needed"
+
 
 add_alias_cd_to_bashrc () {
-    echo "creating alias cd=\'cd -P\'." 
-    echo "This will fix the path from growing when following symbolic links."
+    echo "creating a conditional cd -P alias in ~/.bashrc"
+    echo "this will fix the path from growing when following symbolic links."
+    echo "Now please run:"
+    echo "    > source ~/.bashrc  (to reload bash into your current session)"
+    echo "    > which cd          (to view details)"
     echo
     echo >> ~/.bashrc
-    echo "alias cd=\'cd -P\'  ### fix the path from growing when following symbolic links" >> ~/.bashrc
+    sed '/### fix the path from growing/d' ~/.bashrc
+    sed '/cd_git ()/d' ~/.bashrc
+    echo "### fix the path from growing when following symbolic links in git repositories" >> ~/.bashrc
+    echo "cd_git () { if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then \cd -P $op; else \cd $op; fi }; alias cd='cd_git'" >> ~/.bashrc
 }
 
 
@@ -147,26 +164,28 @@ gitmaketree_function () {
 #   
 ##########################################################################################
 
-i_hate_trees=0
-if (( ! $i_hate_trees )); then
-cat <<'EOF'
+trees="\
                  ,@@@@@@@,
          ,,,.   ,@@@@@@/@@,  .oo8888o.
-      ,&%%&%&&%,@@@@@/@@@@@@,8888\88/8o
-     ,%&\%&&%&&%,@@@\@@@/@@@88\88888/88'
-     %&&%&%&/%&&%@@\@@/ /@@@88888\88888'
-     %&&%/ %&%%&&@@\ V /@@' `88\8 `/88'
-     `&%\ ` /%&'    |.|        \ '|8'
+      ,&%%&%&&%,@@@@@/@@@@@@,8888&88/8o
+     ,%&$%&&%&&%,@@@&@@@/@@@88&88888/88'
+     %&&%&%&/%&&%@@&@@/ /@@@88888&88888'
+     %&&%/ %&%%&&@@& V /@@' '88&8 '/88'
+     '&%\ ' /%&'    |.|        \ '|8'
          |o|        | |         | |
          |.|        | |         | |
-  jgs \\/ ._\//_/__/  ,\_//__\\/.  \_//__/_
+  jgs \/ ._\//_/__/  ,\_//__\/.  \_//__/_
+" # https://asciiart.website/index.php?art=plants/trees
 
-EOF
-# https://asciiart.website/index.php?art=plants/trees
+i_hate_trees=0
+if (( ! $i_hate_trees )); then
+    echo $trees
 fi
 
 if [[ -z $1 ]] || [[ $1 == "-h" ]] || [[ -n $2 ]]; then
     echo "$usage"
+    echo
+    echo "$cleanup"
 elif [[ $1 == "install" ]]; then
     add_alias_cd_to_bashrc
 else
