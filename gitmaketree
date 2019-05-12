@@ -100,10 +100,6 @@ add_alias_cd_to_bashrc () {
     echo >> ~/.bashrc
     sed -i '/### START fix the path from growing/,/### END fix the path from growing/d' ~/.bashrc
     echo "$bashrc_alias" >> ~/.bashrc
-
-    #op='$@'
-    #echo "### fix the path from growing when following symbolic links in git repositories" >> ~/.bashrc
-    #echo "cd_git () { if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then \cd -P \"$op\"; else \cd \"$op\"; fi }; alias cd='cd_git'" >> ~/.bashrc
 }
 
 
