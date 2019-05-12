@@ -157,6 +157,8 @@ gitmaketree_function () {
             (( $? )) && echo "Error unable to copy $copy_extra_stuff_path2 to $1"
         fi
     fi
+echo
+echo "$cleanup"
 }
 
 ##########################################################################################
