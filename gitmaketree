@@ -61,8 +61,9 @@ add_alias_cd_to_bashrc () {
     echo "    > which cd          (to view details)"
     echo
     echo >> ~/.bashrc
-    sed '/### fix the path from growing/d' ~/.bashrc
-    sed '/cd_git ()/d' ~/.bashrc
+    sed -i '/### fix the path from growing/d' ~/.bashrc
+    sed -i '/cd_git ()/d' ~/.bashrc
+    op='$@'
     echo "### fix the path from growing when following symbolic links in git repositories" >> ~/.bashrc
     echo "cd_git () { if [[ -e .git ]] && [[ \"$op\" =~ ^_ ]]; then \cd -P $op; else \cd $op; fi }; alias cd='cd_git'" >> ~/.bashrc
 }
@@ -179,7 +180,7 @@ trees="\
 
 i_hate_trees=0
 if (( ! $i_hate_trees )); then
-    echo $trees
+    echo "$trees"
 fi
 
 if [[ -z $1 ]] || [[ $1 == "-h" ]] || [[ -n $2 ]]; then
