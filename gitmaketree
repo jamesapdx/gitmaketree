@@ -15,12 +15,11 @@
 #   this will add the following conditional cd -P alias to .bashrc
 #       cd_git () { if [[ -e .git ]] && [[ "$@" =~ ^_ ]]; then \cd -P $@; else \cd $@; fi }; alias cd='cd_git'
 #   conditional = only when .git exists and target starts with _
-#   probably don't want cd -P, otherwise other directories will be hard to traverse
-#   shouldn't affect other operations or scripts
+#   probably don't want cd -P all the time, otherwise other directories would be hard to navigate
 #
 #   Does:
 #   1) worktree add <path_new_worktree>  (this will also create a new branch)
-#      check proper usage, new worktree not in same directory, not on master, uncommitted/unstaged files
+#      checks: proper usage, new worktree not in same directory, not on master, uncommitted/unstaged files
 #   2) make a symbolic link to the new worktree directory and add that to .gitignore
 #   3) make a symbolic link in the new worktree directory back to parent and add that to it's .gitignore
 #   4) copy_extra_stuff_path1/2, used to copy stuff that git worktree add might not do
@@ -212,6 +211,6 @@ if [[ -z $1 ]] || [[ $1 == "-h" ]] || [[ -n $2 ]]; then
 elif [[ $1 == "install" ]]; then
     add_alias_cd_to_bashrc
 else
-    gitmaketree_function $1 $2
+    gitmaketree_function $1
 fi
 
