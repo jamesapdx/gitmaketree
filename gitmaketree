@@ -61,8 +61,7 @@ The worktree should be created outside your existing repository.
 Following symbolic links with cd causes the existing path to grow rather than just
 changing to the target directory. That is fine for other directories, but it's not
 what we want with our new links. To fix this:
-    > $scriptname install   (add a conditional cd -P alias to ~/.bashrc)
-    - follow the instructions"
+    > $scriptname install     (add a conditional cd -P alias to ~/.bashrc)"
 
 cleanup="\
 When done with the worktree, clean up with:
@@ -76,7 +75,7 @@ Creating a conditional cd -P alias in ~/.bashrc
 This will fix the path from growing when following the new symbolic links.
 
 Now please do:
-    > source ~/.bashrc  (to reload bash into your current session)
+    > source ~/.bashrc  (to reload .bashrc into your current session)
     > which cd          (to view details)
     - copy this script to a directory in your path, such as /bin or ~/bin"
 
