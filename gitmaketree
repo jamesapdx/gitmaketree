@@ -112,18 +112,16 @@ gitmaketree_function () {
         branch_name=$(basename "$1")
         output=$(git worktree add "$1" 2>&1)
         error=$?
+        #echo "error: $error"
         if [[ $error == "128" ]] && [[ $output =~ "already exists" ]]; then
-            echo "> worktree already exists. Continuing..."
+            echo "> worktree already exists. Enabling copy warnings and continuing..."
+            copy_without_overwrite_warning=0    #1=yes, 0=no
         elif (( $error )); then
+            echo $output
             echo "Error using git worktree add ${1}.  Exiting"
             exit 1 
         fi
-        echo "error: $error"
-        echo "output: $output"
-        exit
-        
-        #(( $? )) && echo 
-        sleep .6
+        sleep .5
 
         # CREATE BRANCH LINK AND ADD TO GITIGNORE
         worktree_absolute_path=$(realpath "$1")
