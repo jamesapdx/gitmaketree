@@ -110,8 +110,13 @@ gitmaketree_function () {
 
         # CREATE WORKTREE
         branch_name=$(basename "$1")
-        git worktree add "$1"
-        (( $? )) && echo "Error using git worktree add ${1}." && exit 1
+        output=$(git worktree add "$1" 2>&1)
+        error=$?
+        echo "error: $error"
+        echo "output: $output"
+        exit
+        
+        #(( $? )) && echo "Error using git worktree add ${1}." && exit 1
         sleep .6
 
         # CREATE BRANCH LINK AND ADD TO GITIGNORE
