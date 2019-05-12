@@ -113,7 +113,7 @@ gitmaketree_function () {
         branch_name=$(basename "$1")
         git worktree add "$1"
         (( $? )) && echo "Error using git worktree add ${1}." && exit 1
-        sleep 1
+        sleep .6
 
         # CREATE BRANCH LINK AND ADD TO GITIGNORE
         worktree_absolute_path=$(realpath "$1")
@@ -152,7 +152,6 @@ gitmaketree_function () {
             echo "> _parent added to .gitignore"
         fi
 
-read -p "asdf" t
         # COPY EXTRA STUFF
         if [[ -n $copy_extra_stuff_path1 ]]; then
             echo "> copying $copy_extra_stuff_path1 to $1"
@@ -165,7 +164,6 @@ read -p "asdf" t
             fi
             (( $error )) && echo "Error unable to copy $copy_extra_stuff_path1 to $1"
         fi
-read -p "asdf" t
         if [[ -n $copy_extra_stuff_path2 ]]; then
             echo "> copying $copy_extra_stuff_path2 to $1"
             if (( $copy_without_overwrite_warning )); then
